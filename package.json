@@ -83,8 +83,7 @@
     },
     "mac": {
       "target": [
-        "dmg",
-        "zip"
+        "dmg"
       ],
       "category": "public.app-category.video",
       "icon": "build/icon.png",

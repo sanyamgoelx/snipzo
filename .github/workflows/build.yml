@@ -1,10 +1,12 @@
 # Builds Snipzo for Windows and macOS on every push, tests it, and publishes a release for a v* tag.
 #  - test:   the end-to-end test under Xvfb (fake windows, x11grab, fed sound) + the snapping bench
-#  - build:  Windows portable exe, Mac .dmg/.zip for Apple silicon and Intel; then a smoke check runs INSIDE
+#  - build:  Windows portable exe, Mac .dmg for Apple silicon and Intel; then a smoke check runs INSIDE
 #            each built app (SNIPZO_SMOKE=1: display list, screen -> ffmpeg device, window list, encoders,
 #            file clipboard round trip, keyboard hook thread on Windows), and the Mac app's signature and
 #            .dmg contents are checked
-#  - release: only for tags v*, only when everything above passed; uploads exactly the files that were tested
+#  - release: for a v* tag, or a manual run with "Publish a release" ticked (Actions › Build › Run workflow);
+#             only when everything above passed; makes the tag v<package.json version> on the tested commit and
+#             uploads exactly the files that were tested
 name: Build
 
 on:
@@ -13,6 +15,11 @@ on:
     tags: ['v*']
   pull_request:
   workflow_dispatch:
+    inputs:
+      publish:
+        description: 'Publish a release of this version (package.json) once everything passes'
+        type: boolean
+        default: false
 
 concurrency:
   group: build-${{ github.ref }}
@@ -79,6 +86,8 @@ jobs:
           Get-Content $f
           $n = ((Get-Content $f | Where-Object { $_ -like 'SMOKE*' } | ForEach-Object { if ($_.Length -gt 400) { $_.Substring(0, 400) } else { $_ } }) -join '%0A')
           Write-Host "::notice title=Smoke check (windows)::$n"
+          $sz = (Get-ChildItem dist\*.exe | ForEach-Object { '{0} {1:N0} MB' -f $_.Name, ($_.Length / 1MB) }) + (Get-ChildItem dist\win-unpacked\resources\app.asar.unpacked\node_modules -Directory | ForEach-Object { '{0:N0} MB {1}' -f ((Get-ChildItem $_.FullName -Recurse -File | Measure-Object Length -Sum).Sum / 1MB), $_.Name })
+          Write-Host "::notice title=Windows sizes::$($sz -join '%0A')"
           if (-not (Select-String -Path $f -Pattern 'SMOKE OK' -Quiet)) {
             $t = ((Get-Content $f -Tail 60) -join '%0A') -replace '\r', ''
             Write-Host "::error title=Smoke check (Windows)::$t"
@@ -91,7 +100,7 @@ jobs:
         env: { USE_HARD_LINKS: 'false' } # electron-builder's hard links gave EEXIST on an unpacked file
         run: |
           sudo pkill -9 XProtect >/dev/null 2>&1 || true
-          bash ci/step.sh "Build (Mac, try 1)" npx electron-builder --mac dmg zip --${{ matrix.arch }} --publish never || { sleep 5; sudo pkill -9 XProtect >/dev/null 2>&1 || true; bash ci/step.sh "Build (Mac, try 2)" npx electron-builder --mac dmg zip --${{ matrix.arch }} --publish never; }
+          bash ci/step.sh "Build (Mac, try 1)" npx electron-builder --mac dmg --${{ matrix.arch }} --publish never || { sleep 5; sudo pkill -9 XProtect >/dev/null 2>&1 || true; bash ci/step.sh "Build (Mac, try 2)" npx electron-builder --mac dmg --${{ matrix.arch }} --publish never; }
       - name: Check the Mac app (signature, architecture, .dmg contents)
         if: runner.os == 'macOS'
         run: bash ci/step.sh "Check the Mac app" bash ci/check-mac.sh
@@ -112,11 +121,10 @@ jobs:
           path: |
             dist/*.exe
             dist/*.dmg
-            dist/*.zip
           if-no-files-found: error
 
   release:
-    if: startsWith(github.ref, 'refs/tags/v')
+    if: startsWith(github.ref, 'refs/tags/v') || (github.event_name == 'workflow_dispatch' && inputs.publish)
     needs: [test, build]
     runs-on: ubuntu-24.04
     permissions: { contents: write }
@@ -128,7 +136,12 @@ jobs:
         env: { GH_TOKEN: '${{ secrets.GITHUB_TOKEN }}' }
         run: |
           ls -la out
-          V="${GITHUB_REF_NAME#v}"
+          V=$(node -p "require('./package.json').version")
+          case "$GITHUB_REF" in refs/tags/v*) test "${GITHUB_REF_NAME#v}" = "$V" || { echo "::error::tag $GITHUB_REF_NAME but package.json says $V"; exit 1; };; esac
           test -f "out/Snipzo-Portable-$V.exe" && test -f "out/Snipzo-$V-mac-arm64.dmg" && test -f "out/Snipzo-$V-mac-x64.dmg"
           (cd out && sha256sum * > SHA256SUMS.txt)
-          gh release create "$GITHUB_REF_NAME" out/* --title "Snipzo $V" --notes-file ci/release-notes.md
+          if gh release view "v$V" >/dev/null 2>&1; then
+            echo "::error::Release v$V already exists. Raise the version in package.json for a new one."; exit 1
+          fi
+          gh release create "v$V" out/* --target "$GITHUB_SHA" --title "Snipzo $V" --notes-file ci/release-notes.md
+          echo "::notice title=Released::https://github.com/${{ github.repository }}/releases/tag/v$V"

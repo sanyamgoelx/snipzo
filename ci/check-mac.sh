@@ -10,3 +10,6 @@ FF=$(find "$APP" -path '*ffmpeg-static/ffmpeg' -type f | head -1); echo "$FF"; l
 DMG=$(ls dist/*.dmg | head -1); hdiutil attach -nobrowse -mountpoint /tmp/snz "$DMG"
 test -d /tmp/snz/Snipzo.app && test -L /tmp/snz/Applications && echo "dmg holds Snipzo.app + Applications link"
 hdiutil detach /tmp/snz
+# sizes, as a notice (the download people get)
+SZ=$( { ls -l dist/*.dmg | awk '{printf "%s %.0f MB\n", $NF, $5/1048576}'; du -sm "$APP/Contents/Frameworks" "$APP/Contents/Resources/app.asar" "$APP/Contents/Resources/app.asar.unpacked/node_modules/"* 2>/dev/null | sort -rn | awk '{printf "%s MB %s\n", $1, $2}'; } | sed "s#$APP/Contents/##" | awk 'BEGIN{ORS="%0A"} {print}')
+echo "::notice title=Mac app sizes::$SZ"
