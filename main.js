@@ -941,9 +941,13 @@ async function smoke({ exit = true } = {}) {
   // a 2 s recording of the main screen through the real flow, when this machine allows screen capture
   if (IS_MAC && M.screenAccess() === 'granted' && out) {
     const d = screen.getPrimaryDisplay(), phys = G.toRecordRect({ x: 40, y: 60, w: 320, h: 200 }, d.scaleFactor, out);
-    state = 'picking'; await startRecording(d, out, phys);
-    await sleep(2500); await stopRecording('stopped');
-    check('a real 2 s snip was saved', !!(doneData && doneData.ok), doneData ? (doneData.ok ? `${doneData.info.video.width}×${doneData.info.video.height}, ${doneData.info.duration.toFixed(1)} s` : doneData.why) : 'no result', false);
+    state = 'picking'; const t0 = Date.now(); await startRecording(d, out, phys);
+    for (let i = 0; i < 100 && recCtx && !recCtx.startedAt; i++) await sleep(100); // the 2 s count from when the picture really started
+    const warm = recCtx && recCtx.startedAt ? recCtx.startedAt - t0 : null;
+    check('the screen grab starts', warm != null, warm != null ? `after ${warm} ms` : 'did not start within 10 s');
+    await sleep(2000); await stopRecording('stopped');
+    const dur = doneData && doneData.ok ? doneData.info.duration : 0;
+    check('a real 2 s snip was saved, 2 s long', dur > 1.7 && dur < 2.6, doneData ? (doneData.ok ? `${doneData.info.video.width}×${doneData.info.video.height}, ${dur.toFixed(2)} s` : doneData.why) : 'no result');
   }
   const failed = res.filter((x) => x.required && !x.ok).length;
   say(`SMOKE ${failed ? 'FAILED' : 'OK'} ${res.filter((x) => x.ok).length}/${res.length}`);
