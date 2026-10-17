@@ -36,6 +36,9 @@
     ],
     "files": [
       "**/*",
+      "!coverage/**",
+      "!.git/**",
+      "!dist/**",
       "!docs/**",
       "!scratch/**",
       "!test/**",
@@ -95,12 +98,7 @@
         "LSUIElement": true,
         "NSMicrophoneUsageDescription": "Snipzo records your mic into snips when Mic is switched on.",
         "NSScreenCaptureUsageDescription": "Snipzo records the area of the screen you pick."
-      },
-      "files": [
-        "!node_modules/ffprobe-static/bin/win32/**",
-        "!node_modules/koffi/build/koffi/win32_*/**",
-        "!keyworker.js"
-      ]
+      }
     },
     "dmg": {
       "artifactName": "Snipzo-${version}-mac-${arch}.${ext}"
