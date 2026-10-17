@@ -22,18 +22,18 @@ jobs:
   test:
     runs-on: ubuntu-24.04
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v5
         with: { node-version: 22, cache: npm }
       - run: sudo apt-get update && sudo apt-get install -y xvfb xcompmgr ffmpeg
       - run: npm ci --no-audit --no-fund
       - name: Snapping bench
-        run: node test/content-bench.js
+        run: bash ci/step.sh "Snapping bench" node test/content-bench.js
       - name: End-to-end test (Xvfb)
         run: |
-          bash test/run.sh | tee test-output.txt
-          node ci/check-results.js /tmp/snipzo-shots/results.json
-      - uses: actions/upload-artifact@v4
+          bash ci/step.sh "End-to-end test" bash test/run.sh
+          bash ci/step.sh "End-to-end results" node ci/check-results.js /tmp/snipzo-shots/results.json
+      - uses: actions/upload-artifact@v5
         if: always()
         with: { name: test-screenshots, path: /tmp/snipzo-shots }
 
@@ -48,14 +48,17 @@ jobs:
     runs-on: ${{ matrix.os }}
     name: build ${{ matrix.name }}
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v5
         with: { node-version: 22, cache: npm }
-      - run: npm ci --no-audit --no-fund
+      - name: Install
+        shell: bash
+        run: bash ci/step.sh "npm ci" npm ci --no-audit --no-fund
 
       - name: Build (Windows)
         if: runner.os == 'Windows'
-        run: npx electron-builder --win portable --x64 --publish never
+        shell: bash
+        run: bash ci/step.sh "Build (Windows)" npx electron-builder --win portable --x64 --publish never
       - name: Smoke check inside the built app (Windows)
         if: runner.os == 'Windows'
         shell: pwsh
@@ -65,26 +68,21 @@ jobs:
           if (-not $p.WaitForExit(90000)) { $p.Kill(); Write-Host "smoke run timed out" }
           $f = Join-Path $env:TEMP 'snipzo-smoke.txt'
           Get-Content $f
-          if (-not (Select-String -Path $f -Pattern 'SMOKE OK' -Quiet)) { exit 1 }
+          if (-not (Select-String -Path $f -Pattern 'SMOKE OK' -Quiet)) {
+            $t = ((Get-Content $f -Tail 60) -join '%0A') -replace '\r', ''
+            Write-Host "::error title=Smoke check (Windows)::$t"
+            exit 1
+          }
 
       # XProtect can hold the .dmg image open on GitHub's Macs (seen with Convertino)
       - name: Build (Mac)
         if: runner.os == 'macOS'
         run: |
           sudo pkill -9 XProtect >/dev/null 2>&1 || true
-          npx electron-builder --mac dmg zip --${{ matrix.arch }} --publish never || { sleep 5; sudo pkill -9 XProtect >/dev/null 2>&1 || true; npx electron-builder --mac dmg zip --${{ matrix.arch }} --publish never; }
+          bash ci/step.sh "Build (Mac, try 1)" npx electron-builder --mac dmg zip --${{ matrix.arch }} --publish never || { sleep 5; sudo pkill -9 XProtect >/dev/null 2>&1 || true; bash ci/step.sh "Build (Mac, try 2)" npx electron-builder --mac dmg zip --${{ matrix.arch }} --publish never; }
       - name: Check the Mac app (signature, architecture, .dmg contents)
         if: runner.os == 'macOS'
-        run: |
-          APP=$(find dist -maxdepth 2 -name Snipzo.app -type d | head -1); echo "$APP"
-          codesign --verify --deep --strict --verbose=2 "$APP"
-          codesign -dv "$APP" 2>&1 | grep -E "Signature|Identifier|Format"
-          lipo -archs "$APP/Contents/MacOS/Snipzo"
-          FF=$(find "$APP" -path '*ffmpeg-static/ffmpeg' -type f | head -1); echo "$FF"; lipo -archs "$FF"; "$FF" -hide_banner -version | head -1
-          /usr/libexec/PlistBuddy -c 'Print :LSUIElement' "$APP/Contents/Info.plist"
-          DMG=$(ls dist/*.dmg | head -1); hdiutil attach -nobrowse -mountpoint /tmp/snz "$DMG"
-          test -d /tmp/snz/Snipzo.app && test -L /tmp/snz/Applications && echo "dmg holds Snipzo.app + Applications link"
-          hdiutil detach /tmp/snz
+        run: bash ci/step.sh "Check the Mac app" bash ci/check-mac.sh
       - name: Smoke check inside the built app (Mac)
         if: runner.os == 'macOS'
         run: |
@@ -93,9 +91,9 @@ jobs:
           PID=$!; for i in $(seq 1 90); do kill -0 $PID 2>/dev/null || break; sleep 1; done
           kill $PID 2>/dev/null || true
           grep SMOKE smoke.txt || cat smoke.txt
-          grep -q 'SMOKE OK' smoke.txt
+          grep -q 'SMOKE OK' smoke.txt || { bash ci/step.sh "Smoke check (Mac)" bash -c 'tail -n 60 smoke.txt; exit 1'; }
 
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v5
         with:
           name: snipzo-${{ matrix.name }}
           path: |
@@ -110,8 +108,8 @@ jobs:
     runs-on: ubuntu-24.04
     permissions: { contents: write }
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/download-artifact@v4
+      - uses: actions/checkout@v5
+      - uses: actions/download-artifact@v5
         with: { path: out, pattern: snipzo-*, merge-multiple: true }
       - name: Publish the tested files
         env: { GH_TOKEN: '${{ secrets.GITHUB_TOKEN }}' }
