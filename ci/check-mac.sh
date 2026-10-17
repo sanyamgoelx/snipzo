@@ -13,3 +13,4 @@ hdiutil detach /tmp/snz
 # sizes, as a notice (the download people get)
 SZ=$( { ls -l dist/*.dmg | awk '{printf "%s %.0f MB\n", $NF, $5/1048576}'; du -sm "$APP/Contents/Frameworks" "$APP/Contents/Resources/app.asar" "$APP/Contents/Resources/app.asar.unpacked/node_modules/"* 2>/dev/null | sort -rn | awk '{printf "%s MB %s\n", $1, $2}'; } | sed "s#$APP/Contents/##" | awk 'BEGIN{ORS="%0A"} {print}')
 echo "::notice title=Mac app sizes::$SZ"
+echo "::notice title=Inside app.asar::$(node ci/asar-sizes.js "$APP/Contents/Resources/app.asar")"
