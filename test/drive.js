@@ -34,7 +34,8 @@ module.exports = async function drive(api) {
     shot('1-pick-open');
     ov.webContents.sendInputEvent({ type: 'mouseMove', x: 800, y: 380 }); await wait(300);
     const label1 = await ov.webContents.executeJavaScript("document.getElementById('tag').textContent");
-    check('hover snaps to the comp frame drawn inside the viewer (content snapping)', /frame/.test(label1) && /720 × 380/.test(label1), label1);
+    const chainDump = await ov.webContents.executeJavaScript("JSON.stringify({ shot: shot && [shot.w, shot.h], scale: shotScale, chain: chain.map((r) => [r.kind, Math.round(r.x), Math.round(r.y), Math.round(r.w), Math.round(r.h), r.frame]) })");
+    check('hover snaps to the comp frame drawn inside the viewer (content snapping)', /frame/.test(label1) && /720 × 380/.test(label1), label1 + ' ' + chainDump);
     shot('2-hover-viewer');
     ov.webContents.sendInputEvent({ type: 'mouseWheel', x: 800, y: 380, deltaX: 0, deltaY: 120, wheelTicksY: 1, canScroll: true }); await wait(300);
     const label2 = await ov.webContents.executeJavaScript("document.getElementById('tag').textContent");
@@ -132,6 +133,7 @@ module.exports = async function drive(api) {
     const doneText = api.done ? await api.done.webContents.executeJavaScript("document.getElementById('card').innerText") : '';
     check('done card shows the saved file', /720 × 380/.test(doneText), doneText.replace(/\s+/g, ' '));
     doneFile = (doneText.match(/\/[^\n]*?\.mp4/) || [])[0];
+    check('the clipboard copy was attempted (copy is on by default)', /Copied to clipboard|not copied/.test(doneText), doneText.split('\n').slice(0, 3).join(' '));
     shot('7-done');
 
     // 4. check the file: size, length, sound, and that picture and sound line up

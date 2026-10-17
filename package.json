@@ -99,7 +99,8 @@
       },
       "files": [
         "!node_modules/ffprobe-static/bin/win32/**",
-        "!node_modules/koffi/build/koffi/win32_*/**"
+        "!node_modules/koffi/build/koffi/win32_*/**",
+        "!keyworker.js"
       ]
     },
     "dmg": {

@@ -60,7 +60,8 @@ process.on('uncaughtException', (e) => log('uncaught', e && e.stack || String(e)
 // ---------- settings ----------
 const DEFAULTS = {
   hotkey: IS_MAC ? 'Alt+Shift+R' : 'Super+Shift+R', saveDir: '', fps: 60, quality: 'high', cursor: true,
-  system: !IS_MAC, // macOS doesn't hand system sound to apps like this one; the mic works mic: true, micId: 'default', micLabel: '', copy: true, countdown: 0, openAtLogin: false,
+  system: !IS_MAC, // macOS doesn't hand system sound to apps like this one; the mic works
+  mic: true, micId: 'default', micLabel: '', copy: true, countdown: 0, openAtLogin: false,
   syncMs: 0, syncChecked: 0, // measured by Check sound sync: how late the sound was, removed from every recording
 };
 let settings = { ...DEFAULTS };
