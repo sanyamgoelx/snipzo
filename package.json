@@ -88,7 +88,7 @@
       ],
       "category": "public.app-category.video",
       "icon": "build/icon.png",
-      "identity": "-",
+      "identity": null,
       "hardenedRuntime": false,
       "gatekeeperAssess": false,
       "artifactName": "Snipzo-${version}-mac-${arch}.${ext}",
@@ -105,7 +105,8 @@
     },
     "dmg": {
       "artifactName": "Snipzo-${version}-mac-${arch}.${ext}"
-    }
+    },
+    "afterPack": "ci/after-pack.js"
   },
   "repository": {
     "type": "git",

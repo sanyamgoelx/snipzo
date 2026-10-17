@@ -21,6 +21,7 @@ concurrency:
 jobs:
   test:
     runs-on: ubuntu-24.04
+    permissions: { contents: write } # only to push the screenshots of a failed run to the ci-shots branch
     steps:
       - uses: actions/checkout@v5
       - uses: actions/setup-node@v5
@@ -31,11 +32,19 @@ jobs:
         run: bash ci/step.sh "Snapping bench" node test/content-bench.js
       - name: End-to-end test (Xvfb)
         run: |
-          bash ci/step.sh "End-to-end test" bash test/run.sh
+          bash ci/step.sh "End-to-end test" bash -c "bash test/run.sh | tee test-output.txt"
           bash ci/step.sh "End-to-end results" node ci/check-results.js /tmp/snipzo-shots/results.json
       - uses: actions/upload-artifact@v5
         if: always()
         with: { name: test-screenshots, path: /tmp/snipzo-shots }
+      # Screenshots of a failed run on a branch, so they can be fetched with git (artifacts need a storage host)
+      - name: Push screenshots of a failed run
+        if: failure()
+        run: |
+          D=$(mktemp -d); cp -r /tmp/snipzo-shots/. "$D"/ 2>/dev/null || true; cp test-output.txt "$D"/ 2>/dev/null || true
+          cd "$D" && git init -q && git checkout -q -b ci-shots && git add -A
+          git -c user.name=ci -c user.email=ci@users.noreply.github.com commit -q -m "screenshots of run ${{ github.run_id }}"
+          git push -f -q "https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}" ci-shots
 
   build:
     strategy:
