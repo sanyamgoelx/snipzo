@@ -974,7 +974,7 @@ app.whenReady().then(async () => {
   const firstRun = !fs.existsSync(path.join(app.getPath('userData'), 'seen-welcome'));
   // Started by hand from source (run.vbs): open Settings so it's clear it is running. Not after a code-change restart.
   if (!firstRun && FROM_SOURCE && !process.argv.includes('--relaunched') && !process.env.SNIPZO_TEST) openSettings();
-  if (firstRun) {
+  if (firstRun && !process.env.SNIPZO_TEST) {
     try { fs.writeFileSync(path.join(app.getPath('userData'), 'seen-welcome'), '1'); } catch { /* fine */ }
     openSettings();
   }

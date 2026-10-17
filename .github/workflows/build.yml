@@ -77,6 +77,8 @@ jobs:
           if (-not $p.WaitForExit(90000)) { $p.Kill(); Write-Host "smoke run timed out" }
           $f = Join-Path $env:TEMP 'snipzo-smoke.txt'
           Get-Content $f
+          $n = ((Get-Content $f | Where-Object { $_ -like 'SMOKE*' } | ForEach-Object { if ($_.Length -gt 400) { $_.Substring(0, 400) } else { $_ } }) -join '%0A')
+          Write-Host "::notice title=Smoke check (windows)::$n"
           if (-not (Select-String -Path $f -Pattern 'SMOKE OK' -Quiet)) {
             $t = ((Get-Content $f -Tail 60) -join '%0A') -replace '\r', ''
             Write-Host "::error title=Smoke check (Windows)::$t"
@@ -101,6 +103,7 @@ jobs:
           PID=$!; for i in $(seq 1 90); do kill -0 $PID 2>/dev/null || break; sleep 1; done
           kill $PID 2>/dev/null || true
           grep SMOKE smoke.txt || cat smoke.txt
+          echo "::notice title=Smoke check (${{ matrix.name }})::$(grep SMOKE smoke.txt | cut -c1-400 | sed -e 's/%/%25/g' | awk 'BEGIN{ORS="%0A"} {print}')"
           grep -q 'SMOKE OK' smoke.txt || { bash ci/step.sh "Smoke check (Mac)" bash -c 'tail -n 60 smoke.txt; exit 1'; }
 
       - uses: actions/upload-artifact@v5
