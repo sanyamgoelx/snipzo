@@ -12,7 +12,9 @@ let mode = 'off';        // off | hover | press | drag | sel | move | resize
 let chain = [], level = 0, levelBias = 0, chainKey = '';
 let sel = null, press = null, grab = null, edges = { xs: [], ys: [] };
 let lastPoint = null;
-let history = [];        // earlier selections, for Ctrl+Z
+let history = [];        // earlier selections, for Ctrl+Z (Cmd+Z on a Mac)
+const MAC = snz.platform === 'darwin';
+const KEY = MAC ? { undo: 'Cmd+Z', size: 'Option', alt: 'Option' } : { undo: 'Ctrl+Z', size: 'Ctrl', alt: 'Alt' }; // on a Mac, Ctrl+arrows switch Spaces
 let barBottom = false;   // where the toolbar sits; changes only when a selection settles, never while pointing
 let shot = null, shotScale = 1, contentCache = new Map(), tightCache = new Map(); // still image of this screen for content snapping
 
@@ -121,6 +123,7 @@ function render() {
   else if (D.free != null && D.free < 200 * 1024 * 1024) blocked = `Only ${fmtBytes(D.free)} free where snips are saved.`;
   go.disabled = !p || !!blocked;
   go.textContent = p ? `Record ${sizeText(p)}` : 'Pick an area';
+  goKey.hidden = !D.canKey; // Windows only for now (a Mac needs Accessibility permission to watch keys); hidden, not a dead button
   goKey.disabled = go.disabled || !D.canKey;
   goKey.title = D.canKey ? 'This snip waits until you tap Space in your app (After Effects plays the preview) and ends at the next tap. Shift+Enter' : 'Windows only for now: on a Mac, watching the Space key needs Accessibility permission, which Snipzo does not ask for yet.';
   warn.classList.toggle('link', !!D.screenBlocked); warn.title = D.screenBlocked ? 'Open System Settings' : '';
@@ -128,8 +131,8 @@ function render() {
   warn.textContent = blocked || (D.free != null ? `${fmtBytes(D.free)} free` : '');
   hint.innerHTML = showSel ? 'Adjust it, then <b>Enter</b> to record' : 'Click a window or panel, or <b>drag</b> a box';
   help.textContent = showSel
-    ? 'Drag an edge or corner to resize · drag inside to move · arrows nudge (Shift ×10, Ctrl resizes) · Ctrl+Z undo · click elsewhere to pick again · Esc cancels'
-    : 'Scroll to step to a bigger or smaller area · hold Alt while dragging to stop snapping · Esc cancels';
+    ? `Drag an edge or corner to resize · drag inside to move · arrows nudge (Shift ×10, ${KEY.size} resizes) · ${KEY.undo} undo · click elsewhere to pick again · Esc cancels`
+    : `Scroll to step to a bigger or smaller area · hold ${KEY.alt} while dragging to stop snapping · Esc cancels`;
   bar.classList.toggle('bottom', barBottom);
 }
 // The toolbar starts at the top and stays put while you point (it used to jump away from the mouse whenever the
@@ -237,7 +240,8 @@ document.addEventListener('keydown', (e) => {
   if (dir && sel && mode === 'sel') { // nudge by real pixels: 1 (Shift: 10); Ctrl moves the right/bottom edge instead
     e.preventDefault();
     const step = (e.shiftKey ? 10 : 1) / (D.scale || 1), before = { ...sel };
-    let n = e.ctrlKey ? { ...sel, w: sel.w + dir[0] * step, h: sel.h + dir[1] * step } : { ...sel, x: sel.x + dir[0] * step, y: sel.y + dir[1] * step };
+    const resize = MAC ? e.altKey : e.ctrlKey;
+    let n = resize ? { ...sel, w: sel.w + dir[0] * step, h: sel.h + dir[1] * step } : { ...sel, x: sel.x + dir[0] * step, y: sel.y + dir[1] * step };
     n.x = Math.max(0, Math.min(D.w - n.w, n.x)); n.y = Math.max(0, Math.min(D.h - n.h, n.y)); n.w = Math.min(n.w, D.w - n.x); n.h = Math.min(n.h, D.h - n.y);
     if (phys(n)) { if (!e.repeat) history.push(before); sel = n; settle(); }
   }

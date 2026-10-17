@@ -142,7 +142,7 @@ window.addEventListener('keydown', async (e) => {
   if (/^Key[A-Z]$/.test(e.code)) key = e.code.slice(3); else if (/^Digit[0-9]$/.test(e.code)) key = e.code.slice(5); else if (/^F([1-9]|1[0-9]|2[0-4])$/.test(e.code)) key = e.code;
   if (!key) return;
   const mods = []; if (e.ctrlKey) mods.push('Control'); if (e.altKey) mods.push('Alt'); if (e.shiftKey) mods.push('Shift'); if (e.metaKey) mods.push('Super');
-  if (!mods.length && !/^F/.test(key)) { $('hk-keys').innerHTML = '<span class="listen">Add Ctrl, Alt or Shift to a letter or number</span>'; return; }
+  if (!mods.length && !/^F/.test(key)) { $('hk-keys').innerHTML = `<span class="listen">Add ${MAC ? 'Cmd, Option, Ctrl' : 'Ctrl, Alt'} or Shift to a letter or number</span>`; return; }
   listening = false; await snz.invoke('snz:pause-hotkey', false);
   set({ hotkey: [...mods, key].join('+') });
 });

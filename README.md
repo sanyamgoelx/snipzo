@@ -33,9 +33,9 @@ From [Releases](https://github.com/sanyamgoelx/snipzo/releases/latest):
   preferred over shapes or guides inside it, its edges are placed to the pixel (a half-blended edge line at a
   fractional zoom is left out), and panels lose their thin plain border.
   Scroll to step to a bigger or smaller area. Click to pick it, or drag a free box; its edges snap to window and
-  panel edges (hold Alt to stop snapping). Drag the handles to adjust, Enter or **Record W × H** to start. Esc cancels.
+  panel edges (hold Alt, Option on a Mac, to stop snapping). Drag the handles to adjust, Enter or **Record W × H** to start. Esc cancels.
 - **Adjust before recording:** drag any edge or corner of the selection (the cursor shows the arrows), drag inside
-  to move it, arrow keys nudge 1 px (Shift: 10, Ctrl: resize), Ctrl+Z steps back, click elsewhere to pick again.
+  to move it, arrow keys nudge 1 px (Shift: 10; Ctrl, Option on a Mac: resize), Ctrl+Z (Cmd+Z) steps back, click elsewhere to pick again.
   A resize down to nothing goes back to what was there. The toolbar stays at the top while you point at it.
 - **Record** starts right away and hands the keyboard back to the app you picked, so Space plays an After Effects
   comp without a click. **Start on Space** (next to Record, or Shift+Enter) is for this one snip only: Snipzo
