@@ -1,0 +1,25 @@
+<!doctype html>
+<meta charset="utf-8">
+<title>fake desktop</title>
+<style>
+html, body { margin: 0; height: 100%; overflow: hidden; font: 12px "Segoe UI", sans-serif; color: #8a93a6; background: radial-gradient(ellipse 60% 70% at 78% 20%, #2B3550 0%, transparent 70%), #151A24; }
+.w, .p { box-sizing: border-box; }
+.w { position: absolute; background: #1C2130; box-shadow: 0 0 0 1px #2E3546; border-radius: 6px; overflow: hidden; }
+.w > .t { height: 26px; background: #232939; border-bottom: 1px solid #2E3546; padding: 5px 10px; color: #c9cfdb; }
+.p { position: absolute; background: #20263a; border: 1px solid #333b52; display: grid; place-items: center; }
+.p.viewer { background: #232323; }
+.p.viewer-inner { border: 0; background: linear-gradient(160deg, #24304A, #3D2C48 60%, #4A3A2C); color: #E9D8A6; font-weight: 600; }
+body.flash .p.viewer-inner { background: #fff; }
+</style>
+<body>
+<script>
+const wins = JSON.parse(new URLSearchParams(location.search).get('w'));
+for (const w of [...wins].reverse()) {
+  const el = document.createElement('div'); el.className = 'w';
+  Object.assign(el.style, { left: w.x + 'px', top: w.y + 'px', width: w.w + 'px', height: w.h + 'px' });
+  el.innerHTML = `<div class="t">${w.title}</div>`;
+  for (const p of w.parts) { const q = document.createElement('div'); q.className = 'p ' + (p.cls || ''); Object.assign(q.style, { left: (p.x - w.x) + 'px', top: (p.y - w.y) + 'px', width: p.w + 'px', height: p.h + 'px' }); q.textContent = p.label || ''; el.appendChild(q); }
+  document.body.appendChild(el);
+}
+</script>
+</body>

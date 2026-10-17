@@ -1,0 +1,113 @@
+{
+  "name": "snipzo",
+  "version": "0.3.0",
+  "description": "Record an area of the screen with sound; the MP4 lands in Videos and on the clipboard",
+  "main": "main.js",
+  "scripts": {
+    "start": "electron .",
+    "build": "electron-builder --win portable --x64",
+    "icons": "node scripts/make-icons.js",
+    "build:mac": "electron-builder --mac dmg zip --publish never"
+  },
+  "author": "Crofty",
+  "license": "MIT",
+  "devDependencies": {
+    "electron": "^32.2.0",
+    "electron-builder": "^25.1.8"
+  },
+  "dependencies": {
+    "ffmpeg-static": "^5.2.0",
+    "ffprobe-static": "^3.1.0",
+    "koffi": "^2.16.3"
+  },
+  "build": {
+    "appId": "in.crofty.snipzo",
+    "productName": "Snipzo",
+    "npmRebuild": false,
+    "asarUnpack": [
+      "keyworker.js",
+      "node_modules/ffmpeg-static/**",
+      "node_modules/ffprobe-static/**",
+      "node_modules/koffi/**"
+    ],
+    "compression": "normal",
+    "electronLanguages": [
+      "en-US"
+    ],
+    "files": [
+      "**/*",
+      "!docs/**",
+      "!scratch/**",
+      "!test/**",
+      "!scripts/**",
+      "!ci/**",
+      "!.github/**",
+      "!.staging/**",
+      "!node_modules/ffprobe-static/bin/linux/**",
+      "!node_modules/ffmpeg-static/*.README",
+      "!node_modules/ffmpeg-static/example.js",
+      "!node_modules/ffmpeg-static/install.js",
+      "!node_modules/koffi/build/koffi/{freebsd_*,linux_*,openbsd_*,musl_*,win32_ia32,win32_arm64}/**",
+      "!node_modules/koffi/src/**",
+      "!node_modules/koffi/doc/**",
+      "!build.bat",
+      "!run.vbs",
+      "!setup.bat",
+      "!*.md",
+      "!setup.log",
+      "!setup-status.txt",
+      "!.dev-command"
+    ],
+    "directories": {
+      "output": "dist",
+      "buildResources": "build"
+    },
+    "win": {
+      "icon": "build/icon.ico",
+      "target": [
+        {
+          "target": "portable",
+          "arch": [
+            "x64"
+          ]
+        }
+      ],
+      "files": [
+        "!node_modules/ffprobe-static/bin/darwin/**",
+        "!node_modules/ffprobe-static/bin/win32/ia32/**",
+        "!node_modules/koffi/build/koffi/darwin_*/**"
+      ]
+    },
+    "portable": {
+      "artifactName": "Snipzo-Portable-${version}.${ext}"
+    },
+    "mac": {
+      "target": [
+        "dmg",
+        "zip"
+      ],
+      "category": "public.app-category.video",
+      "icon": "build/icon.png",
+      "identity": "-",
+      "hardenedRuntime": false,
+      "gatekeeperAssess": false,
+      "artifactName": "Snipzo-${version}-mac-${arch}.${ext}",
+      "extendInfo": {
+        "LSUIElement": true,
+        "NSMicrophoneUsageDescription": "Snipzo records your mic into snips when Mic is switched on.",
+        "NSScreenCaptureUsageDescription": "Snipzo records the area of the screen you pick."
+      },
+      "files": [
+        "!node_modules/ffprobe-static/bin/win32/**",
+        "!node_modules/koffi/build/koffi/win32_*/**"
+      ]
+    },
+    "dmg": {
+      "artifactName": "Snipzo-${version}-mac-${arch}.${ext}"
+    }
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/sanyamgoelx/snipzo.git"
+  }
+}

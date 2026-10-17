@@ -1,0 +1,38 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'">
+<title>Snipzo sound sync check</title>
+<style>
+/* Sound sync check: black, then white + a beep at the same moment, three times. Snipzo records this window
+   and measures how far apart the flash and the beep land in the file. */
+html, body { margin: 0; height: 100%; background: #000; overflow: hidden; cursor: default; }
+body.on { background: #fff; }
+p { position: fixed; left: 0; right: 0; bottom: 8px; margin: 0; text-align: center; font: 11px "Segoe UI", sans-serif; color: #333; }
+</style>
+</head>
+<body>
+<p>Snipzo is checking sound sync. Three short beeps.</p>
+<script>
+'use strict';
+const ctx = new AudioContext({ latencyHint: 'interactive' });
+const frame = () => new Promise((r) => requestAnimationFrame(r));
+const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
+async function flashBeep() {
+  await frame();
+  const osc = ctx.createOscillator(), g = ctx.createGain();
+  osc.frequency.value = 1000; g.gain.value = 0.5; osc.connect(g).connect(ctx.destination);
+  document.body.classList.add('on');
+  const t = ctx.currentTime; osc.start(t); osc.stop(t + 0.15);
+  await sleep(150);
+  document.body.classList.remove('on');
+}
+snz.on('snz:sync-go', async () => {
+  await ctx.resume();
+  for (let k = 0; k < 3; k++) { await flashBeep(); await sleep(850); }
+  snz.send('snz:sync-done');
+});
+</script>
+</body>
+</html>

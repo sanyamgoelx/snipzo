@@ -1,0 +1,54 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'">
+<title>Snipzo pick</title>
+<link rel="stylesheet" href="snipzo.css">
+<style>
+html, body { margin: 0; height: 100%; overflow: hidden; background: transparent; user-select: none; cursor: crosshair; font: 13px/1.4 var(--sans); color: var(--text); }
+#shade { position: fixed; inset: 0; background: var(--shade); }
+#shade.cut { background: transparent; }
+#box { position: fixed; display: none; box-shadow: 0 0 0 99999px var(--shade); pointer-events: none; }
+#box.hover { outline: 1.5px dashed var(--sel); outline-offset: 0; background: var(--sel-dim); }
+#box.sel { outline: 1.5px solid var(--sel); background: rgba(125, 211, 252, 0.02); } /* never fully transparent: on Windows a click could fall through to the app below */
+#box .h { position: absolute; width: 10px; height: 10px; pointer-events: none; background: var(--sel); border: 1.5px solid var(--bg); border-radius: 2px; display: none; }
+#box.sel .h { display: block; }
+.h.nw { left: -6px; top: -6px; } .h.n { left: calc(50% - 5px); top: -6px; } .h.ne { right: -6px; top: -6px; }
+.h.w { left: -6px; top: calc(50% - 5px); } .h.e { right: -6px; top: calc(50% - 5px); }
+.h.sw { left: -6px; bottom: -6px; } .h.s { left: calc(50% - 5px); bottom: -6px; } .h.se { right: -6px; bottom: -6px; }
+#tag { position: fixed; display: none; pointer-events: none; max-width: min(520px, 80vw); background: var(--panel); border: 1px solid var(--line-hi); border-radius: 7px; padding: 4px 8px; font-size: 12px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; box-shadow: 0 6px 18px rgba(0,0,0,.4); }
+#tag b { font-weight: 600; } #tag .k { color: var(--sel); font: 600 11px var(--mono); margin-left: 6px; } #tag .px { color: var(--dim); font: 500 11px var(--mono); margin-left: 6px; }
+#bar { position: fixed; left: 50%; top: 14px; transform: translateX(-50%); display: flex; align-items: center; gap: 6px; padding: 6px; background: var(--panel); border: 1px solid var(--line-hi); border-radius: 12px; box-shadow: 0 12px 32px rgba(0,0,0,.5); white-space: nowrap; cursor: default; }
+#bar.bottom { top: auto; bottom: 18px; }
+#hint { color: var(--dim); font-size: 12px; padding: 0 6px 0 4px; }
+#hint b { color: var(--text); font-weight: 600; }
+.sep { width: 1px; align-self: stretch; background: var(--line); margin: 0 2px; }
+#warn { color: var(--warn); font-size: 12px; padding: 0 4px; }
+#warn.link { cursor: pointer; text-decoration: underline; max-width: 420px; white-space: normal; }
+#help { position: fixed; left: 50%; bottom: 18px; transform: translateX(-50%); font-size: 11.5px; color: var(--dim); background: var(--panel); border: 1px solid var(--line); padding: 4px 11px; border-radius: 99px; white-space: nowrap; pointer-events: none; }
+#bar.bottom ~ #help { bottom: auto; top: 18px; }
+</style>
+</head>
+<body>
+<div id="shade"></div>
+<div id="box"><i class="h nw" data-h="nw"></i><i class="h n" data-h="n"></i><i class="h ne" data-h="ne"></i><i class="h w" data-h="w"></i><i class="h e" data-h="e"></i><i class="h sw" data-h="sw"></i><i class="h s" data-h="s"></i><i class="h se" data-h="se"></i></div>
+<div id="tag"></div>
+<div id="bar" hidden>
+  <span id="hint"></span>
+  <button class="btn ghost" id="full" type="button">Whole screen</button>
+  <div class="sep"></div>
+  <button class="tog" id="t-sys" type="button" aria-pressed="true"><span class="sw"></span>System sound</button>
+  <button class="tog" id="t-mic" type="button" aria-pressed="true"><span class="sw"></span><span id="mic-name">Mic</span></button>
+  <div class="sep"></div>
+  <span id="warn" hidden></span>
+  <button class="btn quiet" id="cancel" type="button">Esc</button>
+  <button class="btn rec" id="go" type="button" disabled>Pick an area</button>
+  <button class="btn ghost" id="go-key" type="button" disabled title="This snip waits until you tap Space in your app (After Effects plays the preview) and ends at the next tap. Shift+Enter">Start on Space</button>
+</div>
+<div id="help" hidden></div>
+<script src="../geometry.js"></script>
+<script src="content.js"></script>
+<script src="overlay.js"></script>
+</body>
+</html>

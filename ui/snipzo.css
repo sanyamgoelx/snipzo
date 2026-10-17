@@ -1,0 +1,48 @@
+/* Snipzo: shared look. Single dark look, like Crofty's other tools; sky blue marks what is picked,
+   red marks recording. Colours only from these tokens. */
+:root {
+  --bg: #0D0F14;
+  --panel: rgba(20, 23, 31, 0.97);
+  --raise: #161921;
+  --raise-2: #1E222C;
+  --line: #2A2F3B;
+  --line-hi: #3A4150;
+  --text: #EEF0F4;
+  --dim: #9AA1B0;
+  --faint: #6B7282;
+  --rec: #FF4D5E;
+  --rec-dim: rgba(255, 77, 94, 0.16);
+  --sel: #7DD3FC;
+  --sel-dim: rgba(125, 211, 252, 0.10);
+  --good: #34D399;
+  --good-dim: rgba(52, 211, 153, 0.14);
+  --warn: #FBBF24;
+  --warn-dim: rgba(251, 191, 36, 0.14);
+  --shade: rgba(5, 7, 11, 0.50);
+  --sans: "Segoe UI Variable Text", "Segoe UI", system-ui, sans-serif;
+  --mono: "Cascadia Mono", Consolas, ui-monospace, monospace;
+  color-scheme: dark;
+}
+* { box-sizing: border-box; }
+[hidden] { display: none !important; }
+button { font: inherit; color: inherit; }
+.btn { font-size: 12.5px; font-weight: 600; border: 0; border-radius: 8px; padding: 6px 12px; cursor: pointer; display: inline-flex; align-items: center; gap: 7px; white-space: nowrap; line-height: 1.3; }
+.btn:focus-visible, .tog:focus-visible { outline: 2px solid var(--sel); outline-offset: 2px; }
+.btn.rec { background: var(--rec); color: #fff; }
+.btn.rec::before { content: ""; width: 8px; height: 8px; border-radius: 50%; background: #fff; flex: none; }
+.btn.rec:disabled { background: var(--raise-2); color: var(--faint); cursor: default; }
+.btn.rec:disabled::before { background: var(--faint); }
+.btn.ghost { background: var(--raise-2); color: var(--text); box-shadow: inset 0 0 0 1px var(--line-hi); }
+.btn.ghost:hover { background: #262B37; }
+.btn.quiet { background: transparent; color: var(--dim); padding-inline: 8px; }
+.btn.quiet:hover { color: var(--text); }
+.btn.danger { background: transparent; color: var(--dim); }
+.btn.danger:hover { color: var(--rec); }
+.tog { display: inline-flex; align-items: center; gap: 7px; font-size: 12px; padding: 5px 8px; border-radius: 7px; border: 0; background: transparent; cursor: pointer; color: var(--text); }
+.tog:hover { background: var(--raise-2); }
+.tog .sw { width: 26px; height: 15px; border-radius: 99px; background: var(--line-hi); position: relative; flex: none; transition: background .15s; }
+.tog .sw::after { content: ""; position: absolute; left: 2px; top: 2px; width: 11px; height: 11px; border-radius: 50%; background: #fff; transition: left .15s; }
+.tog[aria-pressed="true"] .sw { background: var(--good); }
+.tog[aria-pressed="true"] .sw::after { left: 13px; }
+.tog[aria-pressed="false"] { color: var(--dim); }
+@media (prefers-reduced-motion: reduce) { .tog .sw, .tog .sw::after { transition: none; } }

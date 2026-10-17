@@ -1,0 +1,76 @@
+[
+ {
+  "id": "w1",
+  "title": "Adobe After Effects 2025 - Untitled Project.aep",
+  "cls": "AE_CApplication_25.0",
+  "z": 0,
+  "x": 120,
+  "y": 80,
+  "w": 1200,
+  "h": 720,
+  "parts": [
+   {
+    "id": "p1",
+    "cls": "project",
+    "label": "Project",
+    "depth": 1,
+    "x": 130,
+    "y": 130,
+    "w": 280,
+    "h": 400
+   },
+   {
+    "id": "p2",
+    "cls": "viewer",
+    "label": "",
+    "depth": 1,
+    "x": 420,
+    "y": 130,
+    "w": 760,
+    "h": 440
+   },
+   {
+    "id": "p3",
+    "cls": "viewer-inner",
+    "label": "Composition: Shot 12",
+    "depth": 2,
+    "x": 440,
+    "y": 170,
+    "w": 720,
+    "h": 380,
+    "drawOnly": true
+   },
+   {
+    "id": "p4",
+    "cls": "timeline",
+    "label": "Timeline",
+    "depth": 1,
+    "x": 130,
+    "y": 580,
+    "w": 1180,
+    "h": 210
+   },
+   {
+    "id": "p5",
+    "cls": "tools",
+    "label": "",
+    "depth": 2,
+    "x": 440,
+    "y": 140,
+    "w": 300,
+    "h": 24
+   }
+  ]
+ },
+ {
+  "id": "w2",
+  "title": "Discord",
+  "cls": "Chrome_WidgetWin_1",
+  "z": 1,
+  "x": 1000,
+  "y": 420,
+  "w": 560,
+  "h": 420,
+  "parts": []
+ }
+]

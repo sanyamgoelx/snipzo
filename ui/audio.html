@@ -1,0 +1,100 @@
+<!doctype html>
+<meta charset="utf-8">
+<title>Snipzo sound</title>
+<script>
+// Hidden window: captures system sound (Windows loopback) and the mic, mixes them, and sends
+// 48 kHz stereo 16-bit chunks to the main process, which writes them next to the picture.
+'use strict';
+const WORKLET = `
+class Tap extends AudioWorkletProcessor {
+  constructor() { super(); this.buf = new Float32Array(1024 * 2); this.n = 0; this.peak = 0; }
+  process(inputs) {
+    const inp = inputs[0] || [];
+    const L = inp[0] || null, R = inp[1] || inp[0] || null;
+    const len = (L && L.length) || 128;
+    for (let i = 0; i < len; i++) {
+      const l = L ? L[i] : 0, r = R ? R[i] : 0;
+      this.buf[this.n * 2] = l; this.buf[this.n * 2 + 1] = r;
+      const a = Math.max(Math.abs(l), Math.abs(r)); if (a > this.peak) this.peak = a;
+      if (++this.n === 1024) { this.port.postMessage({ pcm: this.buf.slice(0), peak: this.peak }); this.n = 0; this.peak = 0; }
+    }
+    return true;
+  }
+}
+registerProcessor('snz-tap', Tap);`;
+
+let ctx = null, tap = null, micGain = null, streams = [];
+
+async function systemStream() {
+  // Electron's desktop capture brings Windows' loopback sound along with the (unused) picture
+  try {
+    const s = await navigator.mediaDevices.getUserMedia({ audio: { mandatory: { chromeMediaSource: 'desktop' } }, video: { mandatory: { chromeMediaSource: 'desktop', maxWidth: 160, maxHeight: 120, maxFrameRate: 1 } } });
+    s.getVideoTracks().forEach((t) => { t.stop(); s.removeTrack(t); });
+    if (s.getAudioTracks().length) return s;
+  } catch (e) { console.warn('desktop audio (legacy) failed', e); }
+  let s;
+  try { s = await navigator.mediaDevices.getDisplayMedia({ audio: true, video: true }); }
+  catch (e) { if (MAC) throw new Error("macOS doesn't share system sound with apps like Snipzo (a loopback device such as BlackHole, picked as the mic, works)"); throw e; }
+  s.getVideoTracks().forEach((t) => { t.stop(); s.removeTrack(t); });
+  if (!s.getAudioTracks().length) throw new Error(MAC ? "macOS doesn't share system sound with apps like Snipzo (a loopback device such as BlackHole, picked as the mic, works)" : 'Windows gave no system sound');
+  return s;
+}
+async function micStream(id) {
+  const base = { echoCancellation: false, noiseSuppression: false, autoGainControl: false, channelCount: 2 };
+  const want = id && id !== 'default' ? { ...base, deviceId: { exact: id } } : base;
+  try { return await navigator.mediaDevices.getUserMedia({ audio: want, video: false }); }
+  catch (e) { if (id && id !== 'default') { const s = await navigator.mediaDevices.getUserMedia({ audio: base, video: false }); s._fellBack = true; return s; } throw e; }
+}
+const MAC = snz.platform === 'darwin';
+const reason = (e) => (e && (e.name === 'NotFoundError' ? 'no microphone was found' : e.name === 'NotAllowedError' ? (MAC ? 'macOS blocked access (System Settings > Privacy & Security > Microphone)' : 'Windows blocked access (Settings > Privacy > Microphone)') : e.name === 'NotReadableError' ? 'another app is using it exclusively' : e.message)) || 'unknown error';
+
+async function start({ system, mic, micId }) {
+  await stop();
+  const res = { type: 'start', system: system ? { ok: false } : null, mic: mic ? { ok: false } : null };
+  ctx = new AudioContext({ sampleRate: 48000, latencyHint: 'interactive' });
+  const url = URL.createObjectURL(new Blob([WORKLET], { type: 'application/javascript' }));
+  await ctx.audioWorklet.addModule(url);
+  tap = new AudioWorkletNode(ctx, 'snz-tap', { numberOfInputs: 1, numberOfOutputs: 1, outputChannelCount: [2], channelCount: 2, channelCountMode: 'explicit', channelInterpretation: 'speakers' });
+  const sink = ctx.createGain(); sink.gain.value = 0; tap.connect(sink).connect(ctx.destination); // keeps the graph running, silently
+  let any = false;
+  if (system) {
+    try { const s = await systemStream(); streams.push(s); ctx.createMediaStreamSource(s).connect(tap); res.system = { ok: true }; any = true; }
+    catch (e) { res.system = { ok: false, why: reason(e) }; }
+  }
+  if (mic) {
+    try {
+      const s = await micStream(micId); streams.push(s);
+      micGain = ctx.createGain(); ctx.createMediaStreamSource(s).connect(micGain).connect(tap);
+      const t = s.getAudioTracks()[0];
+      res.mic = { ok: true, label: t ? t.label : '', fellBack: !!s._fellBack }; any = true;
+    } catch (e) { res.mic = { ok: false, why: reason(e) }; }
+  }
+  if (any) {
+    tap.port.onmessage = ({ data }) => {
+      const f = data.pcm, out = new Int16Array(f.length);
+      for (let i = 0; i < f.length; i++) { const v = Math.max(-1, Math.min(1, f[i])); out[i] = v < 0 ? v * 0x8000 : v * 0x7fff; }
+      snz.send('snz:audio-chunk', { pcm: out.buffer, frames: f.length / 2, peak: data.peak });
+    };
+    await ctx.resume();
+  } else await stop();
+  return res;
+}
+async function stop() {
+  if (tap) tap.port.onmessage = null;
+  streams.forEach((s) => s.getTracks().forEach((t) => t.stop())); streams = [];
+  if (ctx) { try { await ctx.close(); } catch { /* closed */ } }
+  ctx = null; tap = null; micGain = null;
+}
+
+snz.on('snz:audio', async (m) => {
+  try {
+    if (m.type === 'start') snz.send('snz:audio-reply', await start(m));
+    else if (m.type === 'stop') { await stop(); snz.send('snz:audio-reply', { type: 'stop', ok: true }); }
+    else if (m.type === 'mute') { if (micGain) micGain.gain.value = m.muted ? 0 : 1; snz.send('snz:audio-reply', { type: 'mute', ok: !!micGain }); }
+    else if (m.type === 'devices') {
+      const list = (await navigator.mediaDevices.enumerateDevices()).filter((d) => d.kind === 'audioinput').map((d) => ({ id: d.deviceId, label: d.label }));
+      snz.send('snz:audio-reply', { type: 'devices', list });
+    }
+  } catch (e) { snz.send('snz:audio-reply', { type: m.type, ok: false, error: String(e && e.message || e), system: m.system ? { ok: false, why: String(e.message) } : null, mic: m.mic ? { ok: false, why: String(e.message) } : null }); }
+});
+</script>

@@ -1,0 +1,16 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'">
+<title>Snipzo border</title>
+<style>
+/* A dashed red frame in the outer 2 px of a window 4 px bigger than the recorded area on each side. Click-through; never inside the recording, so not hidden from capture. */
+html, body { margin: 0; height: 100%; background: transparent; overflow: hidden; }
+.f { position: fixed; inset: 0; border: 2px dashed #FF4D5E; border-radius: 2px; }
+.f.armed { border-color: #FFB020; } /* amber: armed, waiting for Space; red: recording */
+</style>
+</head>
+<body><div class="f" id="f"></div>
+<script>snz.on('snz:border', (m) => { document.getElementById('f').classList.toggle('armed', !!m.armed); });</script></body>
+</html>

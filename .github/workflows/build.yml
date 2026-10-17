@@ -1,0 +1,123 @@
+# Builds Snipzo for Windows and macOS on every push, tests it, and publishes a release for a v* tag.
+#  - test:   the end-to-end test under Xvfb (fake windows, x11grab, fed sound) + the snapping bench
+#  - build:  Windows portable exe, Mac .dmg/.zip for Apple silicon and Intel; then a smoke check runs INSIDE
+#            each built app (SNIPZO_SMOKE=1: display list, screen -> ffmpeg device, window list, encoders,
+#            file clipboard round trip, keyboard hook thread on Windows), and the Mac app's signature and
+#            .dmg contents are checked
+#  - release: only for tags v*, only when everything above passed; uploads exactly the files that were tested
+name: Build
+
+on:
+  push:
+    branches: [main]
+    tags: ['v*']
+  pull_request:
+  workflow_dispatch:
+
+concurrency:
+  group: build-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  test:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: 22, cache: npm }
+      - run: sudo apt-get update && sudo apt-get install -y xvfb xcompmgr ffmpeg
+      - run: npm ci --no-audit --no-fund
+      - name: Snapping bench
+        run: node test/content-bench.js
+      - name: End-to-end test (Xvfb)
+        run: |
+          bash test/run.sh | tee test-output.txt
+          node ci/check-results.js /tmp/snipzo-shots/results.json
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with: { name: test-screenshots, path: /tmp/snipzo-shots }
+
+  build:
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - { name: windows, os: windows-latest }
+          - { name: mac-arm64, os: macos-14, arch: arm64 }
+          - { name: mac-x64, os: macos-15-intel, arch: x64 }
+    runs-on: ${{ matrix.os }}
+    name: build ${{ matrix.name }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: 22, cache: npm }
+      - run: npm ci --no-audit --no-fund
+
+      - name: Build (Windows)
+        if: runner.os == 'Windows'
+        run: npx electron-builder --win portable --x64 --publish never
+      - name: Smoke check inside the built app (Windows)
+        if: runner.os == 'Windows'
+        shell: pwsh
+        run: |
+          $env:SNIPZO_SMOKE = '1'
+          $p = Start-Process -FilePath "dist\win-unpacked\Snipzo.exe" -PassThru
+          if (-not $p.WaitForExit(90000)) { $p.Kill(); Write-Host "smoke run timed out" }
+          $f = Join-Path $env:TEMP 'snipzo-smoke.txt'
+          Get-Content $f
+          if (-not (Select-String -Path $f -Pattern 'SMOKE OK' -Quiet)) { exit 1 }
+
+      # XProtect can hold the .dmg image open on GitHub's Macs (seen with Convertino)
+      - name: Build (Mac)
+        if: runner.os == 'macOS'
+        run: |
+          sudo pkill -9 XProtect >/dev/null 2>&1 || true
+          npx electron-builder --mac dmg zip --${{ matrix.arch }} --publish never || { sleep 5; sudo pkill -9 XProtect >/dev/null 2>&1 || true; npx electron-builder --mac dmg zip --${{ matrix.arch }} --publish never; }
+      - name: Check the Mac app (signature, architecture, .dmg contents)
+        if: runner.os == 'macOS'
+        run: |
+          APP=$(find dist -maxdepth 2 -name Snipzo.app -type d | head -1); echo "$APP"
+          codesign --verify --deep --strict --verbose=2 "$APP"
+          codesign -dv "$APP" 2>&1 | grep -E "Signature|Identifier|Format"
+          lipo -archs "$APP/Contents/MacOS/Snipzo"
+          FF=$(find "$APP" -path '*ffmpeg-static/ffmpeg' -type f | head -1); echo "$FF"; lipo -archs "$FF"; "$FF" -hide_banner -version | head -1
+          /usr/libexec/PlistBuddy -c 'Print :LSUIElement' "$APP/Contents/Info.plist"
+          DMG=$(ls dist/*.dmg | head -1); hdiutil attach -nobrowse -mountpoint /tmp/snz "$DMG"
+          test -d /tmp/snz/Snipzo.app && test -L /tmp/snz/Applications && echo "dmg holds Snipzo.app + Applications link"
+          hdiutil detach /tmp/snz
+      - name: Smoke check inside the built app (Mac)
+        if: runner.os == 'macOS'
+        run: |
+          APP=$(find dist -maxdepth 2 -name Snipzo.app -type d | head -1)
+          SNIPZO_SMOKE=1 "$APP/Contents/MacOS/Snipzo" > smoke.txt 2>&1 &
+          PID=$!; for i in $(seq 1 90); do kill -0 $PID 2>/dev/null || break; sleep 1; done
+          kill $PID 2>/dev/null || true
+          grep SMOKE smoke.txt || cat smoke.txt
+          grep -q 'SMOKE OK' smoke.txt
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: snipzo-${{ matrix.name }}
+          path: |
+            dist/*.exe
+            dist/*.dmg
+            dist/*.zip
+          if-no-files-found: error
+
+  release:
+    if: startsWith(github.ref, 'refs/tags/v')
+    needs: [test, build]
+    runs-on: ubuntu-24.04
+    permissions: { contents: write }
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/download-artifact@v4
+        with: { path: out, pattern: snipzo-*, merge-multiple: true }
+      - name: Publish the tested files
+        env: { GH_TOKEN: '${{ secrets.GITHUB_TOKEN }}' }
+        run: |
+          ls -la out
+          V="${GITHUB_REF_NAME#v}"
+          test -f "out/Snipzo-Portable-$V.exe" && test -f "out/Snipzo-$V-mac-arm64.dmg" && test -f "out/Snipzo-$V-mac-x64.dmg"
+          (cd out && sha256sum * > SHA256SUMS.txt)
+          gh release create "$GITHUB_REF_NAME" out/* --title "Snipzo $V" --notes-file ci/release-notes.md

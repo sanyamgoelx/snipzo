@@ -1,0 +1,10 @@
+node_modules/
+dist/
+scratch/
+docs/
+.staging/
+.dev-command
+.force-replace
+setup.log
+setup-status.txt
+*.log
