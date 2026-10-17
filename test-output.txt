@@ -1,0 +1,67 @@
+[3818:1017/201152.213107:ERROR:bus.cc(407)] Failed to connect to the bus: Could not parse server address: Unknown address type (examples of valid types are "tcp" and on UNIX "unix")
+[3818:1017/201152.213174:ERROR:bus.cc(407)] Failed to connect to the bus: Could not parse server address: Unknown address type (examples of valid types are "tcp" and on UNIX "unix")
+[3818:1017/201152.213189:ERROR:bus.cc(407)] Failed to connect to the bus: Could not parse server address: Unknown address type (examples of valid types are "tcp" and on UNIX "unix")
+[3818:1017/201152.213222:ERROR:bus.cc(407)] Failed to connect to the bus: Could not parse server address: Unknown address type (examples of valid types are "tcp" and on UNIX "unix")
+[3818:1017/201152.213236:ERROR:bus.cc(407)] Failed to connect to the bus: Could not parse server address: Unknown address type (examples of valid types are "tcp" and on UNIX "unix")
+[3818:1017/201152.339350:ERROR:bus.cc(407)] Failed to connect to the bus: Could not parse server address: Unknown address type (examples of valid types are "tcp" and on UNIX "unix")
+[3818:1017/201152.353938:ERROR:bus.cc(407)] Failed to connect to the bus: Could not parse server address: Unknown address type (examples of valid types are "tcp" and on UNIX "unix")
+[3818:1017/201152.392010:ERROR:bus.cc(407)] Failed to connect to the bus: Could not parse server address: Unknown address type (examples of valid types are "tcp" and on UNIX "unix")
+[3818:1017/201152.392640:ERROR:bus.cc(407)] Failed to connect to the bus: Could not parse server address: Unknown address type (examples of valid types are "tcp" and on UNIX "unix")
+[3818:1017/201152.400748:ERROR:bus.cc(407)] Failed to connect to the bus: Could not parse server address: Unknown address type (examples of valid types are "tcp" and on UNIX "unix")
+[3818:1017/201152.403394:ERROR:bus.cc(407)] Failed to connect to the bus: Could not parse server address: Unknown address type (examples of valid types are "tcp" and on UNIX "unix")
+[3818:1017/201152.430092:ERROR:bus.cc(407)] Failed to connect to the bus: Could not parse server address: Unknown address type (examples of valid types are "tcp" and on UNIX "unix")
+[3818:1017/201152.439852:ERROR:object_proxy.cc(576)] Failed to call method: org.freedesktop.DBus.NameHasOwner: object_path= /org/freedesktop/DBus: unknown error type: 
+PASS overlay is showing
+PASS toolbar stays at the top while pointing near it (clickable) — top 14
+FAIL hover snaps to the comp frame drawn inside the viewer (content snapping) — Adobe After Effects 2025 - Untitled Project.aeparea 1/8464 × 440 {"shot":[1600,900],"scale":1,"chain":[["area",560,130,465,440,0],["area",560,130,478,440,0],["area",421,130,604,440,0],["area",421,130,617,440,0],["area",560,130,619,440,0],["panel",421,130,758,440,null],["window",120,80,1200,720,null],["screen",0,0,1600,900,null]]}
+PASS scroll steps to the next size — Adobe After Effects 2025 - Untitled Project.aeparea 2/8478 × 440
+FAIL Record button shows the exact size — Record 464 × 440
+FAIL cursor shows a resize arrow on the edge — ,,move
+FAIL dragging the right edge resizes the selection — Record 464 × 440
+FAIL dragging inside moves it (same size) — 573px
+FAIL Ctrl+Z steps back to the original selection — Pick an area at 560px
+FAIL a resize down to nothing keeps the old selection — Pick an area
+PASS dragged box snapped to the project panel edges (130,130 → 410,530, or 1 px in where its border is trimmed) — Record 280 × 400
+[3818:1017/201159.770645:ERROR:bus.cc(407)] Failed to connect to the bus: Could not parse server address: Unknown address type (examples of valid types are "tcp" and on UNIX "unix")
+[3818:1017/201159.771220:ERROR:bus.cc(407)] Failed to connect to the bus: Could not parse server address: Unknown address type (examples of valid types are "tcp" and on UNIX "unix")
+[3818:1017/201159.775229:ERROR:bus.cc(407)] Failed to connect to the bus: Could not parse server address: Unknown address type (examples of valid types are "tcp" and on UNIX "unix")
+[3818:1017/201159.775841:ERROR:bus.cc(407)] Failed to connect to the bus: Could not parse server address: Unknown address type (examples of valid types are "tcp" and on UNIX "unix")
+PASS overlay hidden once recording starts
+PASS recording bar shows a running timer and size — 00:02.9 0.5 MB Stop Win + Shift + R
+[3818:1017/201204.784829:ERROR:bus.cc(407)] Failed to connect to the bus: Could not parse server address: Unknown address type (examples of valid types are "tcp" and on UNIX "unix")
+[3818:1017/201204.785445:ERROR:bus.cc(407)] Failed to connect to the bus: Could not parse server address: Unknown address type (examples of valid types are "tcp" and on UNIX "unix")
+FAIL done card shows the saved file — 0:04 × Saved, not copied: copying files works on Windows and macOS only 0:04 · 464 × 440 · 60 fps · 83 KB ‎/tmp/snipzo-home/Videos/Snipzo 2026-10-17 20.12.04.mp4 Open Show in folder Copy again Discard
+PASS the clipboard copy was attempted (copy is on by default) — 0:04 × Saved, not copied: copying files works on Windows and macOS only
+FAIL file is 720 × 380 yuv420p with sound — [{"codec_type":"video","width":464,"height":440,"pix_fmt":"yuv420p","start_time":"0.000000"},{"codec_type":"audio","start_time":"0.000000"}]
+PASS both tracks start at 0 — audio 0, video 0.000000
+PASS sound is placed where the clock says (within 25 ms) — beep at 2.220 s, expected 2.220 s
+INFO screen paint delay in this virtual display: flash shows at -0.017 s, -2236 ms after it was painted
+PASS discard moves it to the Holding Area — × Moved to the Holding Area ‎/tmp/snipzo-holding/_Quarantine/2026-10-17-20-12-06 snipzo/tmp/snipzo-home/Videos/Snipzo 2026-10-17 20.12.04.mp4 Drive Cleanup can empty it, or you can put the snip back. Put it back
+PASS put back restores the file
+FAIL picker offers Record and On Space for this snip — ["Record 464 × 440",false]
+[3818:1017/201209.684443:ERROR:bus.cc(407)] Failed to connect to the bus: Could not parse server address: Unknown address type (examples of valid types are "tcp" and on UNIX "unix")
+[3818:1017/201209.684961:ERROR:bus.cc(407)] Failed to connect to the bus: Could not parse server address: Unknown address type (examples of valid types are "tcp" and on UNIX "unix")
+[3818:1017/201209.688694:ERROR:bus.cc(407)] Failed to connect to the bus: Could not parse server address: Unknown address type (examples of valid types are "tcp" and on UNIX "unix")
+[3818:1017/201209.689273:ERROR:bus.cc(407)] Failed to connect to the bus: Could not parse server address: Unknown address type (examples of valid types are "tcp" and on UNIX "unix")
+PASS bar waits for Space (Ready, Cancel) — Ready Press Space in your app to start 0.3 MB Cancel Win + Shift + R
+PASS border is amber while waiting — f armed
+PASS after the tap the bar records and says Space stops — 00:00.8 Space again stops 0.6 MB Stop Win + Shift + R
+PASS border turns red once recording — f
+PASS done card says it starts at the tap — 0:01 × Saved, not copied: copying files works on Windows and macOS only 0:01 · 464 × 440 · 60 fps · 26 KB ‎/tmp/snipzo-home/Videos/Snipzo 2026-10-17 20.12.13.mp4 Starts at your Space tap and ends at the next one (2.3 s of waiting cut off). Open Show in folder Copy again Discard
+PASS file is exactly the time between the taps (within 50 ms) — 1.215 s vs 1.215 s
+FAIL the flash lands where it happened after the tap (within 60 ms) — flash at -0.017 s, painted 0.511 s after the tap
+[3818:1017/201216.896827:ERROR:bus.cc(407)] Failed to connect to the bus: Could not parse server address: Unknown address type (examples of valid types are "tcp" and on UNIX "unix")
+[3818:1017/201216.897278:ERROR:bus.cc(407)] Failed to connect to the bus: Could not parse server address: Unknown address type (examples of valid types are "tcp" and on UNIX "unix")
+[3818:1017/201216.900335:ERROR:bus.cc(407)] Failed to connect to the bus: Could not parse server address: Unknown address type (examples of valid types are "tcp" and on UNIX "unix")
+[3818:1017/201216.900768:ERROR:bus.cc(407)] Failed to connect to the bus: Could not parse server address: Unknown address type (examplerror 140: BadRegion request 138 minor 14 serial 25985
+error 140: BadRegion request 138 minor 14 serial 27012
+es of valid types are "tcp" and on UNIX "unix")
+PASS cancel before Space saves nothing and says "Not recorded" — × Not recorded Stopped before Space was pressed, so nothing was saved.
+[3818:1017/201222.583259:ERROR:bus.cc(407)] Failed to connect to the bus: Could not parse server address: Unknown address type (examples of valid types are "tcp" and on UNIX "unix")
+[3818:1017/201222.583815:ERROR:bus.cc(407)] Failed to connect to the bus: Could not parse server address: Unknown address type (examples of valid types are "tcp" and on UNIX "unix")
+[3818:1017/201224.165971:ERROR:bus.cc(407)] Failed to connect to the bus: Could not parse server address: Unknown address type (examples of valid types are "tcp" and on UNIX "unix")
+[3818:1017/201224.166005:ERROR:bus.cc(407)] Failed to connect to the bus: Could not parse server address: Unknown address type (examples of valid types are "tcp" and on UNIX "unix")
+PASS sound sync check runs and reports missing beeps honestly — {"ok":false,"why":"Couldn't measure: the test beeps weren't in the recording (is the PC's sound muted, or playing through a device Windows doesn't treat as the default?)."}
+PASS settings show the shortcut and the encoder check
+
+20/31 passed

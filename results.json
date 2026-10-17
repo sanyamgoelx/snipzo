@@ -1,0 +1,157 @@
+[
+ {
+  "name": "overlay is showing",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "name": "toolbar stays at the top while pointing near it (clickable)",
+  "ok": true,
+  "detail": "top 14"
+ },
+ {
+  "name": "hover snaps to the comp frame drawn inside the viewer (content snapping)",
+  "ok": false,
+  "detail": "Adobe After Effects 2025 - Untitled Project.aeparea 1/8464 × 440 {\"shot\":[1600,900],\"scale\":1,\"chain\":[[\"area\",560,130,465,440,0],[\"area\",560,130,478,440,0],[\"area\",421,130,604,440,0],[\"area\",421,130,617,440,0],[\"area\",560,130,619,440,0],[\"panel\",421,130,758,440,null],[\"window\",120,80,1200,720,null],[\"screen\",0,0,1600,900,null]]}"
+ },
+ {
+  "name": "scroll steps to the next size",
+  "ok": true,
+  "detail": "Adobe After Effects 2025 - Untitled Project.aeparea 2/8478 × 440"
+ },
+ {
+  "name": "Record button shows the exact size",
+  "ok": false,
+  "detail": "Record 464 × 440"
+ },
+ {
+  "name": "cursor shows a resize arrow on the edge",
+  "ok": false,
+  "detail": ",,move"
+ },
+ {
+  "name": "dragging the right edge resizes the selection",
+  "ok": false,
+  "detail": "Record 464 × 440"
+ },
+ {
+  "name": "dragging inside moves it (same size)",
+  "ok": false,
+  "detail": "573px"
+ },
+ {
+  "name": "Ctrl+Z steps back to the original selection",
+  "ok": false,
+  "detail": "Pick an area at 560px"
+ },
+ {
+  "name": "a resize down to nothing keeps the old selection",
+  "ok": false,
+  "detail": "Pick an area"
+ },
+ {
+  "name": "dragged box snapped to the project panel edges (130,130 → 410,530, or 1 px in where its border is trimmed)",
+  "ok": true,
+  "detail": "Record 280 × 400"
+ },
+ {
+  "name": "overlay hidden once recording starts",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "name": "recording bar shows a running timer and size",
+  "ok": true,
+  "detail": "00:02.9 0.5 MB Stop Win + Shift + R"
+ },
+ {
+  "name": "done card shows the saved file",
+  "ok": false,
+  "detail": "0:04 × Saved, not copied: copying files works on Windows and macOS only 0:04 · 464 × 440 · 60 fps · 83 KB ‎/tmp/snipzo-home/Videos/Snipzo 2026-10-17 20.12.04.mp4 Open Show in folder Copy again Discard"
+ },
+ {
+  "name": "the clipboard copy was attempted (copy is on by default)",
+  "ok": true,
+  "detail": "0:04 × Saved, not copied: copying files works on Windows and macOS only"
+ },
+ {
+  "name": "file is 720 × 380 yuv420p with sound",
+  "ok": false,
+  "detail": "[{\"codec_type\":\"video\",\"width\":464,\"height\":440,\"pix_fmt\":\"yuv420p\",\"start_time\":\"0.000000\"},{\"codec_type\":\"audio\",\"start_time\":\"0.000000\"}]"
+ },
+ {
+  "name": "both tracks start at 0",
+  "ok": true,
+  "detail": "audio 0, video 0.000000"
+ },
+ {
+  "name": "sound is placed where the clock says (within 25 ms)",
+  "ok": true,
+  "detail": "beep at 2.220 s, expected 2.220 s"
+ },
+ {
+  "name": "discard moves it to the Holding Area",
+  "ok": true,
+  "detail": "× Moved to the Holding Area ‎/tmp/snipzo-holding/_Quarantine/2026-10-17-20-12-06 snipzo/tmp/snipzo-home/Videos/Snipzo 2026-10-17 20.12.04.mp4 Drive Cleanup can empty it, or you can put the snip back. Put it back"
+ },
+ {
+  "name": "put back restores the file",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "name": "picker offers Record and On Space for this snip",
+  "ok": false,
+  "detail": "[\"Record 464 × 440\",false]"
+ },
+ {
+  "name": "bar waits for Space (Ready, Cancel)",
+  "ok": true,
+  "detail": "Ready Press Space in your app to start 0.3 MB Cancel Win + Shift + R"
+ },
+ {
+  "name": "border is amber while waiting",
+  "ok": true,
+  "detail": "f armed"
+ },
+ {
+  "name": "after the tap the bar records and says Space stops",
+  "ok": true,
+  "detail": "00:00.8 Space again stops 0.6 MB Stop Win + Shift + R"
+ },
+ {
+  "name": "border turns red once recording",
+  "ok": true,
+  "detail": "f"
+ },
+ {
+  "name": "done card says it starts at the tap",
+  "ok": true,
+  "detail": "0:01 × Saved, not copied: copying files works on Windows and macOS only 0:01 · 464 × 440 · 60 fps · 26 KB ‎/tmp/snipzo-home/Videos/Snipzo 2026-10-17 20.12.13.mp4 Starts at your Space tap and ends at the next one (2.3 s of waiting cut off). Open Show in folder Copy again Discard"
+ },
+ {
+  "name": "file is exactly the time between the taps (within 50 ms)",
+  "ok": true,
+  "detail": "1.215 s vs 1.215 s"
+ },
+ {
+  "name": "the flash lands where it happened after the tap (within 60 ms)",
+  "ok": false,
+  "detail": "flash at -0.017 s, painted 0.511 s after the tap"
+ },
+ {
+  "name": "cancel before Space saves nothing and says \"Not recorded\"",
+  "ok": true,
+  "detail": "× Not recorded Stopped before Space was pressed, so nothing was saved."
+ },
+ {
+  "name": "sound sync check runs and reports missing beeps honestly",
+  "ok": true,
+  "detail": "{\"ok\":false,\"why\":\"Couldn't measure: the test beeps weren't in the recording (is the PC's sound muted, or playing through a device Windows doesn't treat as the default?).\"}"
+ },
+ {
+  "name": "settings show the shortcut and the encoder check",
+  "ok": true,
+  "detail": ""
+ }
+]
